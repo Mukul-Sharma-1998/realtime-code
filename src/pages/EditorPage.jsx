@@ -1,13 +1,55 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Client from "../components/Client";
 import Editor from "../components/Editor";
+import { useLocation, useNavigate, Navigate, useParams } from "react-router-dom/dist";
+import toast from "react-hot-toast";
+import ACTIONS from "../Actions";
+
 
 function EditorPage() {
+    const location = useLocation()
+    const socketRef = useRef(null)
+    const {roomId} = useParams()
+    const reactNavigator = useNavigate()
+    
+    useEffect(() => {
+        socketRef.current = new WebSocket(String(import.meta.env.VITE_REACT_APP_BACKEND_URL));
+
+        function handleErrors(e) {
+            console.log('socket error ', e)
+            toast.error('Socket connection failed, try again later!')
+            reactNavigator('/')
+        }
+
+        socketRef.current.onopen = () => {
+            console.log('WebSocket connection established');
+            socketRef.current.send(JSON.stringify({ 
+                type: ACTIONS.JOIN,
+                data: {
+                    roomId,
+                    username: location.state?.username,
+                }
+            }));
+        };
+
+
+        socketRef.current.onclose = () => {
+            console.log('WebSocket connection closed');
+        };
+
+        return () => {
+            socketRef.current.close();
+        };
+    }, []);
     
     const [clients, setClients] = useState([
         { socketId: 1, username: 'Mukul S' },
         { socketId: 2, username: 'Rakesh K' },  
     ])
+
+    if(!location.state) {
+        <Navigate to='/' />
+    }
 
     return (
         <div
