@@ -11,9 +11,11 @@ function EditorPage() {
     const socketRef = useRef(null)
     const {roomId} = useParams()
     const reactNavigator = useNavigate()
+    const [clients, setClients] = useState([])
     
     useEffect(() => {
         socketRef.current = new WebSocket(String(import.meta.env.VITE_REACT_APP_BACKEND_URL));
+        console.log("socketRef ", socketRef.current)
 
         function handleErrors(e) {
             console.log('socket error ', e)
@@ -23,14 +25,30 @@ function EditorPage() {
 
         socketRef.current.onopen = () => {
             console.log('WebSocket connection established');
+
             socketRef.current.send(JSON.stringify({ 
                 type: ACTIONS.JOIN,
-                data: {
-                    roomId,
-                    username: location.state?.username,
-                }
-            }));
+                roomId: roomId,
+                username: location.state?.username,
+            })); 
         };
+
+        socketRef.current.onmessage = (event) => {
+            const data = JSON.parse(event.data)
+            console.log("join event" ,data)
+            if(data.type == ACTIONS.JOINED) {
+                // console.log("inside joined")
+                toast.success(`${data.username} joined the room`)
+                setClients(data.sessionUser)
+            } else if(data.type == ACTIONS.DISCONNECTED) {
+                toast.success(`${data.username} has left the room`)
+                setClients((prev) => {
+                    return prev.filter((client) => client.sessionId != data.sessionId)
+                })
+            }
+            
+
+        }
 
 
         socketRef.current.onclose = () => {
@@ -38,14 +56,15 @@ function EditorPage() {
         };
 
         return () => {
-            socketRef.current.close();
+            if(socketRef.current) {
+                socketRef.current.onmessage = null;
+                socketRef.current.onerror = null;
+                socketRef.current.onclose = null;
+                socketRef.current.close();
+            }
         };
     }, []);
-    
-    const [clients, setClients] = useState([
-        { socketId: 1, username: 'Mukul S' },
-        { socketId: 2, username: 'Rakesh K' },  
-    ])
+
 
     if(!location.state) {
         <Navigate to='/' />
@@ -66,7 +85,7 @@ function EditorPage() {
                             clients.map((client) => (
                                 <Client 
                                     username={client.username} 
-                                    key={client.socketId}
+                                    key={client.sessionId}
                                 />
                             ))
                         }
@@ -76,7 +95,7 @@ function EditorPage() {
                 <button className="bg-green-500 text-black p-3 m-2 w-25 rounded-md font-bold hover:bg-green-600">Exit Room</button>
             </div>
             <div className="h-screen col-span-9">
-                <Editor />
+                <Editor socketRef={socketRef} roomId={roomId}/>
             </div>
         </div>
     )
