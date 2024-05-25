@@ -8,7 +8,7 @@ import 'codemirror/addon/edit/closebrackets'
 import ACTIONS from "../Actions";
 
 
-function Editor({socketRef, roomId, setEditorRef}) {
+function Editor({socketRef, roomId, setEditorRef, onCodeChange}) {
 
     const editorRef = useRef(null);
     useEffect(() => {
@@ -26,6 +26,7 @@ function Editor({socketRef, roomId, setEditorRef}) {
                 console.log('changes', changes)
                 const {origin} = changes
                 const code = instance.getValue();
+                onCodeChange(code)
                 if(origin !== 'setValue' && socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
                     // TODO: send message to server
                     socketRef.current.send(JSON.stringify({

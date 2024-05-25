@@ -13,6 +13,7 @@ function EditorPage() {
     const reactNavigator = useNavigate()
     const [clients, setClients] = useState([])
     const editorRef = useRef(null)
+    const codeRef = useRef(null)
     
     useEffect(() => {
         socketRef.current = new WebSocket(String(import.meta.env.VITE_REACT_APP_BACKEND_URL));
@@ -38,9 +39,14 @@ function EditorPage() {
             const data = JSON.parse(event.data)
             console.log("join event" ,data)
             if(data.type == ACTIONS.JOINED) {
-                // console.log("inside joined")
                 toast.success(`${data.username} joined the room`)
                 setClients(data.sessionUser)
+                socketRef.current.send(JSON.stringify({ 
+                    type: ACTIONS.SYNC_CODE,
+                    roomId: roomId,
+                    username: location.state?.username,
+                    code: codeRef.current
+                })); 
             } else if(data.type == ACTIONS.DISCONNECTED) {
                 toast.success(`${data.username} has left the room`)
                 setClients((prev) => {
@@ -49,7 +55,6 @@ function EditorPage() {
             } else if(data.type == ACTIONS.CODE_CHANGE) {
                 console.log("CODE CHANGE PAGE DATA: " ,data)
                 if(data.code != null) {
-                    console.log("CODE CHANGE EDITOR DATA" ,data)
                     editorRef.current.setValue(data.code)
                 }
             }
@@ -123,7 +128,7 @@ function EditorPage() {
                 <button className="bg-green-500 text-black p-3 m-2 w-25 rounded-md font-bold hover:bg-green-600" onClick={leaveRoom}>Exit Room</button>
             </div>
             <div className="h-screen col-span-9">
-                <Editor socketRef={socketRef} roomId={roomId} setEditorRef={setEditorRef}/>
+                <Editor socketRef={socketRef} roomId={roomId} setEditorRef={setEditorRef} onCodeChange={(code) => {codeRef.current = code}}/>
             </div>
         </div>
     )
