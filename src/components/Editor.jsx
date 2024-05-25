@@ -8,21 +8,7 @@ import 'codemirror/addon/edit/closebrackets'
 import ACTIONS from "../Actions";
 
 
-function Editor({socketRef, roomId}) {
-
-    // useEffect(() => {
-    //     async function init() {
-    //         CodeMirror.fromTextArea(document.getElementById("realtimeEditor"), {
-    //             mode: { name: 'javascript', json: true },
-    //             theme: 'dracula',
-    //             autoCloseTags: true,
-    //             autoCloseBrackets: true,
-    //             lineNumbers: true
-    //         })
-    //     }
-
-    //     init()
-    // },[])
+function Editor({socketRef, roomId, setEditorRef}) {
 
     const editorRef = useRef(null);
     useEffect(() => {
@@ -51,11 +37,12 @@ function Editor({socketRef, roomId}) {
                 }
                 console.log(code)
             })
+
+            setEditorRef(editorRef.current)
+
         }
 
         init();
-        
-
         // Cleanup function to destroy the CodeMirror instance when the component unmounts
         return () => {
             if (editorRef.current) {

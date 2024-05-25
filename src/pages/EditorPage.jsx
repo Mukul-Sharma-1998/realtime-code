@@ -12,6 +12,7 @@ function EditorPage() {
     const {roomId} = useParams()
     const reactNavigator = useNavigate()
     const [clients, setClients] = useState([])
+    const editorRef = useRef(null)
     
     useEffect(() => {
         socketRef.current = new WebSocket(String(import.meta.env.VITE_REACT_APP_BACKEND_URL));
@@ -45,6 +46,12 @@ function EditorPage() {
                 setClients((prev) => {
                     return prev.filter((client) => client.sessionId != data.sessionId)
                 })
+            } else if(data.type == ACTIONS.CODE_CHANGE) {
+                console.log("CODE CHANGE PAGE DATA: " ,data)
+                if(data.code != null) {
+                    console.log("CODE CHANGE EDITOR DATA" ,data)
+                    editorRef.current.setValue(data.code)
+                }
             }
             
 
@@ -64,6 +71,27 @@ function EditorPage() {
             }
         };
     }, []);
+
+
+
+    async function copyRoomId() {
+        try {
+            await navigator.clipboard.writeText(roomId);
+            toast.success("Room ID has been copies to your clipboard")
+        } catch (error) {
+            toast.error("Could not copy the Room ID");
+            console.error(error);
+        }
+    }
+
+    function leaveRoom() {
+        reactNavigator('/');
+    }
+
+    const setEditorRef = (ref) => {
+        console.log(ref)
+        editorRef.current = ref
+    }
 
 
     if(!location.state) {
@@ -91,11 +119,11 @@ function EditorPage() {
                         }
                     </div>
                 </div>
-                <button className="bg-white text-black p-3 m-2 w-25 rounded-md font-bold hover:bg-green-600">COPY ROOM ID</button>
-                <button className="bg-green-500 text-black p-3 m-2 w-25 rounded-md font-bold hover:bg-green-600">Exit Room</button>
+                <button className="bg-white text-black p-3 m-2 w-25 rounded-md font-bold hover:bg-green-600" onClick={copyRoomId}>COPY ROOM ID</button>
+                <button className="bg-green-500 text-black p-3 m-2 w-25 rounded-md font-bold hover:bg-green-600" onClick={leaveRoom}>Exit Room</button>
             </div>
             <div className="h-screen col-span-9">
-                <Editor socketRef={socketRef} roomId={roomId}/>
+                <Editor socketRef={socketRef} roomId={roomId} setEditorRef={setEditorRef}/>
             </div>
         </div>
     )
