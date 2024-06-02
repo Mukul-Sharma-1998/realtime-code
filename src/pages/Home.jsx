@@ -4,7 +4,6 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 function Home() {
-    console.log("homeeeeeeeeeeeeee")
 
     const [roomId, setRoomId] = useState("")
     const [username, setUsername] = useState("")
@@ -39,8 +38,8 @@ function Home() {
 
     return (
         <div className="flex items-center justify-center h-screen w-screen text-center text-white">
-            <div className="bg-gray-700 p-8 rounded-md w-1/2 ">
-                <h1 className="m-10">code sync</h1>
+            <div className="bg-gray-700 p-5 rounded-md w-1/2">
+                <h1 className="m-10 font-bold text-lg">Code It</h1>
                 <h4 className="m-2 mt-0">Paste Invitation Room ID</h4>
                 <div className="flex flex-col justify-center items-center">
                     <input 
@@ -80,7 +79,10 @@ function Home() {
                 </div>
             </div>
             <footer className="bottom-8 w-full fixed">
-                <h4>Built with love by Mukul Sharma</h4>
+            <h4 className="inline">Developed by </h4>
+                <a href="https://www.linkedin.com/in/mukul-sharma-7b029b1a3/">
+                    <h4 className="inline underline text-green-500">Mukul Sharma</h4>
+                </a>
             </footer>
         </div>
     )

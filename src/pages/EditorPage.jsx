@@ -110,7 +110,7 @@ function EditorPage() {
             <div className="text-white flex flex-col p-6 col-span-3 bg-gray-800">
                 <div className="flex-1">
                     <div className="p-4">
-                        <h1 className="border-b border-b-gray-500 p-5">Code Sync</h1>
+                        <h1 className="border-b border-b-gray-500 p-5 font-bold text-lg">Code It</h1>
                     </div>
                     <h3 className="p-4">Connected</h3>
                     <div className="flex flex-wrap p-4">
